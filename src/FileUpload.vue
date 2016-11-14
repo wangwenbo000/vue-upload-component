@@ -212,6 +212,8 @@ export default {
     },
 
     addFileUpload(file) {
+      var reader = new FileReader(); 
+      reader.readAsDataURL(file.file);
       this.uploaded = false;
       var defaultFile = {
         size: -1,
@@ -229,23 +231,22 @@ export default {
         response: {},
 
         xhr: false,
-        iframe: false,
+        iframe: false
       };
+      reader.onload = e => { 
+        file = Object.assign(defaultFile, file, {base64: e.target.result})
+        if (!file.id) {
+          file.id = Math.random().toString(36).substr(2);
+        }
 
-      file = Object.assign(defaultFile, file)
+        if (!this.multiple) {
+          this.clear();
+        }
 
-      if (!file.id) {
-        file.id = Math.random().toString(36).substr(2);
+        file = this.files[this.files.push(file) - 1];
+        this._files[file.id] = file;
+        this._uploadEvents('add', file);
       }
-
-      if (!this.multiple) {
-        this.clear();
-      }
-
-
-      file = this.files[this.files.push(file) - 1];
-      this._files[file.id] = file;
-      this._uploadEvents('add', file);
     },
 
     _uploadEvents(name, file) {
